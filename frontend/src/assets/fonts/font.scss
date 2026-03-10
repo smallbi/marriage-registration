@@ -1,0 +1,31 @@
+@font-face {
+  font-family: YouSheBiaoTiHei;
+  src: local('Microsoft YaHei'), local('PingFang SC'), local('SimHei');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: MetroDF;
+  src: local('Microsoft YaHei'), local('PingFang SC'), local('SimHei');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: DIN;
+  src: local('Microsoft YaHei'), local('PingFang SC'), local('SimHei');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* 全局字体设置 */
+:root {
+  --font-family-primary: YouSheBiaoTiHei, 'Microsoft YaHei', 'PingFang SC', 'SimHei', sans-serif;
+  --font-family-secondary: MetroDF, 'Microsoft YaHei', 'PingFang SC', 'SimHei', sans-serif;
+  --font-family-mono: DIN, 'Microsoft YaHei', 'PingFang SC', 'SimHei', sans-serif;
+}
+
+body {
+  font-family: var(--font-family-primary);
+}
