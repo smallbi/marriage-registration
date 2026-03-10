@@ -10,7 +10,7 @@
         </div>
         <el-form ref="loginFormRef" :model="loginForm" :rules="loginRules" size="large">
           <el-form-item prop="username">
-            <el-input v-model="loginForm.username" placeholder="用户名：admin">
+            <el-input v-model="loginForm.username" placeholder="请输入用户名">
               <template #prefix>
                 <el-icon class="el-input__icon">
                   <User />
@@ -19,7 +19,7 @@
             </el-input>
           </el-form-item>
           <el-form-item prop="password">
-            <el-input v-model="loginForm.password" type="password" placeholder="密码：admin123" show-password
+            <el-input v-model="loginForm.password" type="password" placeholder="请输入密码" show-password
               autocomplete="new-password">
               <template #prefix>
                 <el-icon class="el-input__icon">
@@ -34,9 +34,6 @@
           <el-button round size="large" type="primary" :loading="loading" @click="handleLogin">
             登录
           </el-button>
-        </div>
-        <div class="login-footer">
-          <span class="footer-text">默认账号：admin / admin123</span>
         </div>
       </div>
     </div>
@@ -193,16 +190,6 @@
 
   .login-btn .el-button {
     width: 185px;
-  }
-
-  .login-footer {
-    text-align: center;
-    margin-top: 30px;
-  }
-
-  .footer-text {
-    font-size: 13px;
-    color: #909399;
   }
 
   @media screen and (width <=1250px) {

@@ -23,12 +23,20 @@
               <template #title>数据统计</template>
             </el-menu-item>
 
-            <!-- 人员管理 -->
+            <!-- 人员记录 -->
             <el-menu-item index="/members">
               <el-icon>
                 <User />
               </el-icon>
-              <template #title>人员管理</template>
+              <template #title>人员记录</template>
+            </el-menu-item>
+
+            <!-- 用户管理 -->
+            <el-menu-item index="/users">
+              <el-icon>
+                <UserFilled />
+              </el-icon>
+              <template #title>用户管理</template>
             </el-menu-item>
           </el-menu>
         </el-scrollbar>
@@ -87,7 +95,7 @@
   import { ref, computed, onMounted } from 'vue'
   import { useRouter, useRoute } from 'vue-router'
   import { ElMessage, ElMessageBox } from 'element-plus'
-  import { Connection, User, ArrowDown, SwitchButton, DataAnalysis, Fold, Expand } from '@element-plus/icons-vue'
+  import { Connection, User, UserFilled, ArrowDown, SwitchButton, DataAnalysis, Fold, Expand } from '@element-plus/icons-vue'
 
   const router = useRouter()
   const route = useRoute()
@@ -101,7 +109,8 @@
   const currentPageTitle = computed(() => {
     const titles = {
       '/stats': '数据统计',
-      '/members': '人员管理'
+      '/members': '人员信息',
+      '/users': '用户管理'
     }
     return titles[route.path] || '首页'
   })

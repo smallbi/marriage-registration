@@ -36,6 +36,7 @@ def init_db():
     """初始化数据库表"""
     conn = get_db()
     cursor = conn.cursor()
+    # 创建会员表
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS members (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -57,6 +58,20 @@ def init_db():
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
+    # 创建用户表
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE NOT NULL,
+            password TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+    # 添加默认管理员用户（密码：admin123）
+    cursor.execute("SELECT COUNT(*) FROM users")
+    if cursor.fetchone()[0] == 0:
+        cursor.execute("INSERT INTO users (username, password) VALUES (?, ?)", ("admin", "admin123"))
     conn.commit()
     conn.close()
 
@@ -130,6 +145,19 @@ class PaginatedResponse(BaseModel):
     page_size: int
     total_pages: int
 
+
+# 用户相关模型
+class UserCreate(BaseModel):
+    """新增用户请求模型"""
+    username: str = Field(..., min_length=2, max_length=20, description="登录名")
+    password: str = Field(..., min_length=6, max_length=20, description="登录密码")
+
+class UserResponse(BaseModel):
+    """用户响应模型"""
+    id: int
+    username: str
+    created_at: str
+    updated_at: str
 
 # API 路由
 @app.on_event("startup")
@@ -551,6 +579,114 @@ def get_stats():
         "this_month": this_month
     }
 
+# 用户管理接口
+@app.get("/api/users", response_model=List[UserResponse])
+def get_users():
+    """获取用户列表"""
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users ORDER BY id")
+    rows = cursor.fetchall()
+    conn.close()
+    
+    return [
+        UserResponse(
+            id=row["id"],
+            username=row["username"],
+            created_at=row["created_at"],
+            updated_at=row["updated_at"]
+        )
+        for row in rows
+    ]
+
+@app.post("/api/users", response_model=UserResponse)
+def create_user(user: UserCreate):
+    """新增用户"""
+    conn = get_db()
+    cursor = conn.cursor()
+    
+    try:
+        cursor.execute("INSERT INTO users (username, password) VALUES (?, ?)", (user.username, user.password))
+        conn.commit()
+        
+        # 获取插入的记录
+        cursor.execute("SELECT * FROM users WHERE id = ?", (cursor.lastrowid,))
+        row = cursor.fetchone()
+        
+        return UserResponse(
+            id=row["id"],
+            username=row["username"],
+            created_at=row["created_at"],
+            updated_at=row["updated_at"]
+        )
+    except sqlite3.IntegrityError:
+        conn.rollback()
+        raise HTTPException(status_code=400, detail="用户名已存在")
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        conn.close()
+
+@app.put("/api/users/{user_id}", response_model=UserResponse)
+def update_user(user_id: int, user: UserCreate):
+    """更新用户"""
+    conn = get_db()
+    cursor = conn.cursor()
+    
+    # 检查记录是否存在
+    cursor.execute("SELECT id FROM users WHERE id = ?", (user_id,))
+    if not cursor.fetchone():
+        conn.close()
+        raise HTTPException(status_code=404, detail="用户不存在")
+    
+    try:
+        cursor.execute("UPDATE users SET username = ?, password = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?", 
+                      (user.username, user.password, user_id))
+        conn.commit()
+        
+        # 获取更新后的记录
+        cursor.execute("SELECT * FROM users WHERE id = ?", (user_id,))
+        row = cursor.fetchone()
+        
+        return UserResponse(
+            id=row["id"],
+            username=row["username"],
+            created_at=row["created_at"],
+            updated_at=row["updated_at"]
+        )
+    except sqlite3.IntegrityError:
+        conn.rollback()
+        raise HTTPException(status_code=400, detail="用户名已存在")
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        conn.close()
+
+@app.delete("/api/users/{user_id}")
+def delete_user(user_id: int):
+    """删除用户"""
+    conn = get_db()
+    cursor = conn.cursor()
+    
+    # 检查记录是否存在
+    cursor.execute("SELECT id FROM users WHERE id = ?", (user_id,))
+    if not cursor.fetchone():
+        conn.close()
+        raise HTTPException(status_code=404, detail="用户不存在")
+    
+    # 不允许删除最后一个用户
+    cursor.execute("SELECT COUNT(*) FROM users")
+    if cursor.fetchone()[0] == 1:
+        conn.close()
+        raise HTTPException(status_code=400, detail="不能删除最后一个用户")
+    
+    cursor.execute("DELETE FROM users WHERE id = ?", (user_id,))
+    conn.commit()
+    conn.close()
+    
+    return {"message": "删除成功"}
 
 if __name__ == "__main__":
     import uvicorn

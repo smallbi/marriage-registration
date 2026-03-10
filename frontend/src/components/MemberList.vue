@@ -5,7 +5,7 @@
         <el-icon>
           <List />
         </el-icon>
-        <span>人员记录列表</span>
+        <span>人员信息</span>
       </div>
     </template>
 

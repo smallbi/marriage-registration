@@ -24,6 +24,12 @@ const routes = [
         name: 'Members',
         component: () => import('../views/Members.vue'),
         meta: { title: '会员管理' }
+      },
+      {
+        path: 'users',
+        name: 'Users',
+        component: () => import('../views/Users.vue'),
+        meta: { title: '用户管理' }
       }
     ],
     meta: { requiresAuth: true }
