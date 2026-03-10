@@ -77,9 +77,21 @@
 
       loading.value = true
 
-      // 模拟登录验证
-      setTimeout(() => {
-        if (loginForm.username === 'admin' && loginForm.password === 'admin123') {
+      try {
+        // 使用登录接口进行验证
+        const response = await fetch('http://localhost:8000/api/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(loginForm)
+        })
+        
+        if (!response.ok) throw new Error('登录请求失败')
+        
+        const result = await response.json()
+        
+        if (result.success) {
           // 保存登录状态
           localStorage.setItem('isLoggedIn', 'true')
           localStorage.setItem('username', loginForm.username)
@@ -87,10 +99,14 @@
           ElMessage.success('登录成功，欢迎回来！')
           router.push('/')
         } else {
-          ElMessage.error('用户名或密码错误')
+          ElMessage.error(result.message)
         }
+      } catch (error) {
+        console.error('登录验证失败:', error)
+        ElMessage.error('登录验证失败，请稍后重试')
+      } finally {
         loading.value = false
-      }, 500)
+      }
     })
   }
 

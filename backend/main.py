@@ -688,6 +688,48 @@ def delete_user(user_id: int):
     
     return {"message": "删除成功"}
 
+# 登录相关模型
+class LoginRequest(BaseModel):
+    """登录请求模型"""
+    username: str = Field(..., description="用户名")
+    password: str = Field(..., description="密码")
+
+class LoginResponse(BaseModel):
+    """登录响应模型"""
+    success: bool
+    message: str
+    token: Optional[str] = None
+    user: Optional[UserResponse] = None
+
+# 登录接口
+@app.post("/api/login", response_model=LoginResponse)
+def login(login_data: LoginRequest):
+    """用户登录"""
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users WHERE username = ? AND password = ?", (login_data.username, login_data.password))
+    row = cursor.fetchone()
+    conn.close()
+    
+    if not row:
+        return LoginResponse(
+            success=False,
+            message="用户名或密码错误"
+        )
+    
+    # 这里可以添加JWT token生成逻辑
+    # 为了简单起见，暂时返回成功状态
+    return LoginResponse(
+        success=True,
+        message="登录成功",
+        user=UserResponse(
+            id=row["id"],
+            username=row["username"],
+            created_at=row["created_at"],
+            updated_at=row["updated_at"]
+        )
+    )
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)

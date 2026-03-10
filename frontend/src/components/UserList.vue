@@ -75,7 +75,7 @@ const dialogTitle = ref('新增用户')
 const fetchUsers = async () => {
   loading.value = true
   try {
-    const response = await fetch('/api/users')
+    const response = await fetch('http://localhost:8000/api/users')
     if (!response.ok) throw new Error('获取用户列表失败')
     users.value = await response.json()
   } catch (error) {
@@ -105,7 +105,7 @@ const handleDeleteUser = (userId) => {
     type: 'warning'
   }).then(async () => {
     try {
-      const response = await fetch(`/api/users/${userId}`, {
+      const response = await fetch(`http://localhost:8000/api/users/${userId}`, {
         method: 'DELETE'
       })
       if (!response.ok) throw new Error('删除失败')
@@ -126,7 +126,7 @@ const handleFormSubmit = async (userData) => {
     let response
     if (userData.id) {
       // 编辑用户
-      response = await fetch(`/api/users/${userData.id}`, {
+      response = await fetch(`http://localhost:8000/api/users/${userData.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
@@ -135,7 +135,7 @@ const handleFormSubmit = async (userData) => {
       })
     } else {
       // 新增用户
-      response = await fetch('/api/users', {
+      response = await fetch('http://localhost:8000/api/users', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
