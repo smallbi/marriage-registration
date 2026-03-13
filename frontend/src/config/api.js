@@ -1,6 +1,6 @@
 // API配置文件
-// 动态获取API地址（同源访问）
-export const API_BASE_URL = `${window.location.protocol}//${window.location.hostname}:8000/api`
+// 根据环境自动切换：dev 用 localhost:8000，build 用 /api（Nginx代理）
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api'
 
 // 请求封装
 const request = {

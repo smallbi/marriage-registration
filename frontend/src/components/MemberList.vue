@@ -81,7 +81,7 @@
       </div>
     </div>
 
-    <!-- 表格 -->
+    <!-- 表格（桌面端） -->
     <el-table :data="members" v-loading="loading" stripe border class="member-table" empty-text="暂无人员记录"
       @sort-change="handleSortChange" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" />
@@ -171,6 +171,44 @@
         </template>
       </el-table-column>
     </el-table>
+
+    <!-- 移动端：卡片列表（桌面端隐藏） -->
+    <div class="mobile-card-list mobile-only">
+      <el-card v-for="member in members" :key="member.id" class="member-card" @click="viewDetail(member)">
+        <div class="member-card-header">
+          <el-tag size="small" type="info">{{ member.member_no }}</el-tag>
+          <el-tag :type="member.gender === '男' ? '' : 'warning'" size="small">{{ member.gender }}</el-tag>
+        </div>
+        <div class="member-card-body">
+          <div class="member-card-row">
+            <span class="label">姓名：</span>
+            <span class="value">{{ member.name }}</span>
+          </div>
+          <div class="member-card-row">
+            <span class="label">年龄：</span>
+            <span class="value">{{ member.age }}岁</span>
+          </div>
+          <div class="member-card-row">
+            <span class="label">学历：</span>
+            <span class="value">{{ member.education }}</span>
+          </div>
+          <div class="member-card-row">
+            <span class="label">职业：</span>
+            <span class="value">{{ member.occupation }}</span>
+          </div>
+          <div class="member-card-row">
+            <span class="label">联系方式：</span>
+            <span class="value">{{ member.contact }}</span>
+          </div>
+        </div>
+        <div class="member-card-footer">
+          <el-button size="small" type="primary" text @click.stop="viewDetail(member)">详情</el-button>
+          <el-button size="small" type="warning" text @click.stop="editMember(member)">编辑</el-button>
+          <el-button size="small" type="danger" text @click.stop="$emit('delete', member)">删除</el-button>
+        </div>
+      </el-card>
+      <el-empty v-if="members.length === 0" description="暂无人员记录" />
+    </div>
 
     <!-- 分页 -->
     <div class="pagination-wrapper">
@@ -275,7 +313,7 @@
     <!-- 打印预览弹窗 -->
     <el-dialog v-model="printDialogVisible" title="打印预览" width="800px" destroy-on-close>
       <el-select v-model="printTemplate" style="margin-bottom:20px;width:200px" placeholder="选择打印模板">
-        <el-option value="classic" label="经典版" />
+        <el-option value="classic" label="丽姐·锦绣谱信息表" />
         <el-option value="minimal" label="极简版" />
       </el-select>
 
@@ -288,54 +326,56 @@
           <h2 style="text-align:center;font-family:'微软雅黑';margin-bottom:20px;color:#333">丽姐·锦绣谱信息表</h2>
 
           <table style="width:100%;border-collapse:collapse;font-family:'微软雅黑';font-size:14px;margin-bottom:20px">
-            <tr>
-              <td style="border:1px solid #333;padding:8px"><strong>姓名</strong></td>
-              <td style="border:1px solid #333;padding:8px">{{ printData.name }}</td>
-            </tr>
-            <tr>
-              <td style="border:1px solid #333;padding:8px"><strong>性别</strong></td>
-              <td style="border:1px solid #333;padding:8px">{{ printData.gender }}</td>
-            </tr>
-            <tr>
-              <td style="border:1px solid #333;padding:8px"><strong>年龄</strong></td>
-              <td style="border:1px solid #333;padding:8px">{{ printData.age }}岁</td>
-            </tr>
-            <tr>
-              <td style="border:1px solid #333;padding:8px"><strong>学历</strong></td>
-              <td style="border:1px solid #333;padding:8px">{{ printData.education }}</td>
-            </tr>
-            <tr>
-              <td style="border:1px solid #333;padding:8px"><strong>身高</strong></td>
-              <td style="border:1px solid #333;padding:8px">{{ printData.height || '-' }}cm</td>
-            </tr>
-            <tr>
-              <td style="border:1px solid #333;padding:8px"><strong>职业</strong></td>
-              <td style="border:1px solid #333;padding:8px">{{ printData.occupation }}</td>
-            </tr>
-            <tr>
-              <td style="border:1px solid #333;padding:8px"><strong>身高</strong></td>
-              <td style="border:1px solid #333;padding:8px">{{ printData.height || '-' }}cm</td>
-            </tr>
-            <tr>
-              <td style="border:1px solid #333;padding:8px"><strong>现居住地</strong></td>
-              <td style="border:1px solid #333;padding:8px">{{ printData.current_residence }}</td>
-            </tr>
-            <tr>
-              <td style="border:1px solid #333;padding:8px"><strong>联系方式</strong></td>
-              <td style="border:1px solid #333;padding:8px">{{ printData.contact }}</td>
-            </tr>
-            <tr>
-              <td style="border:1px solid #333;padding:8px"><strong>生肖</strong></td>
-              <td style="border:1px solid #333;padding:8px">{{ printData.zodiac || '-' }}</td>
-            </tr>
-            <tr>
-              <td style="border:1px solid #333;padding:8px"><strong>性格</strong></td>
-              <td style="border:1px solid #333;padding:8px">{{ printData.personality || '-' }}</td>
-            </tr>
-            <tr>
-              <td style="border:1px solid #333;padding:8px"><strong>家庭人员</strong></td>
-              <td style="border:1px solid #333;padding:8px">{{ printData.family_members || '-' }}</td>
-            </tr>
+            <tbody>
+              <tr>
+                <td style="border:1px solid #333;padding:8px"><strong>姓名</strong></td>
+                <td style="border:1px solid #333;padding:8px">{{ printData.name }}</td>
+              </tr>
+              <tr>
+                <td style="border:1px solid #333;padding:8px"><strong>性别</strong></td>
+                <td style="border:1px solid #333;padding:8px">{{ printData.gender }}</td>
+              </tr>
+              <tr>
+                <td style="border:1px solid #333;padding:8px"><strong>年龄</strong></td>
+                <td style="border:1px solid #333;padding:8px">{{ printData.age }}岁</td>
+              </tr>
+              <tr>
+                <td style="border:1px solid #333;padding:8px"><strong>学历</strong></td>
+                <td style="border:1px solid #333;padding:8px">{{ printData.education }}</td>
+              </tr>
+              <tr>
+                <td style="border:1px solid #333;padding:8px"><strong>身高</strong></td>
+                <td style="border:1px solid #333;padding:8px">{{ printData.height || '-' }}cm</td>
+              </tr>
+              <tr>
+                <td style="border:1px solid #333;padding:8px"><strong>职业</strong></td>
+                <td style="border:1px solid #333;padding:8px">{{ printData.occupation }}</td>
+              </tr>
+              <tr>
+                <td style="border:1px solid #333;padding:8px"><strong>身高</strong></td>
+                <td style="border:1px solid #333;padding:8px">{{ printData.height || '-' }}cm</td>
+              </tr>
+              <tr>
+                <td style="border:1px solid #333;padding:8px"><strong>现居住地</strong></td>
+                <td style="border:1px solid #333;padding:8px">{{ printData.current_residence }}</td>
+              </tr>
+              <tr>
+                <td style="border:1px solid #333;padding:8px"><strong>联系方式</strong></td>
+                <td style="border:1px solid #333;padding:8px">{{ printData.contact }}</td>
+              </tr>
+              <tr>
+                <td style="border:1px solid #333;padding:8px"><strong>生肖</strong></td>
+                <td style="border:1px solid #333;padding:8px">{{ printData.zodiac || '-' }}</td>
+              </tr>
+              <tr>
+                <td style="border:1px solid #333;padding:8px"><strong>性格</strong></td>
+                <td style="border:1px solid #333;padding:8px">{{ printData.personality || '-' }}</td>
+              </tr>
+              <tr>
+                <td style="border:1px solid #333;padding:8px"><strong>家庭人员</strong></td>
+                <td style="border:1px solid #333;padding:8px">{{ printData.family_members || '-' }}</td>
+              </tr>
+            </tbody>
           </table>
 
           <hr style="border:1px solid #ddd;margin:20px 0" />
@@ -366,46 +406,48 @@
           <h2 style="text-align:center;font-family:'微软雅黑';margin-bottom:20px;color:#333">丽姐·锦绣谱信息表</h2>
 
           <table style="width:100%;border-collapse:collapse;font-family:'微软雅黑';font-size:14px;margin-bottom:20px">
-            <tr>
-              <td style="border:1px solid #333;padding:8px"><strong>姓名</strong></td>
-              <td style="border:1px solid #333;padding:8px">{{ printData.name }}</td>
-              <td style="border:1px solid #333;padding:8px"><strong>性别</strong></td>
-              <td style="border:1px solid #333;padding:8px">{{ printData.gender }}</td>
-            </tr>
-            <tr>
-              <td style="border:1px solid #333;padding:8px"><strong>年龄</strong></td>
-              <td style="border:1px solid #333;padding:8px">{{ printData.age }}岁</td>
-              <td style="border:1px solid #333;padding:8px"><strong>身高</strong></td>
-              <td style="border:1px solid #333;padding:8px">{{ printData.height || '-' }}cm</td>
-            </tr>
-            <tr>
-              <td style="border:1px solid #333;padding:8px"><strong>婚姻状况</strong></td>
-              <td style="border:1px solid #333;padding:8px">{{ printData.marital_status }}</td>
-              <td style="border:1px solid #333;padding:8px"><strong>学历</strong></td>
-              <td style="border:1px solid #333;padding:8px">{{ printData.education }}</td>
-            </tr>
-            <tr>
-              <td style="border:1px solid #333;padding:8px"><strong>职业</strong></td>
-              <td style="border:1px solid #333;padding:8px">{{ printData.occupation }}</td>
-              <td style="border:1px solid #333;padding:8px"><strong>现居住地</strong></td>
-              <td style="border:1px solid #333;padding:8px">{{ printData.current_residence }}</td>
-            </tr>
-            <tr>
-              <td style="border:1px solid #333;padding:8px"><strong>联系方式</strong></td>
-              <td style="border:1px solid #333;padding:8px">{{ printData.contact }}</td>
-              <td style="border:1px solid #333;padding:8px"><strong>生肖</strong></td>
-              <td style="border:1px solid #333;padding:8px">{{ printData.zodiac || '-' }}</td>
-            </tr>
-            <tr>
-              <td style="border:1px solid #333;padding:8px"><strong>收入</strong></td>
-              <td style="border:1px solid #333;padding:8px">{{ printData.income || '-' }}</td>
-              <td style="border:1px solid #333;padding:8px"><strong>性格</strong></td>
-              <td style="border:1px solid #333;padding:8px">{{ printData.personality || '-' }}</td>
-            </tr>
-            <tr>
-              <td style="border:1px solid #333;padding:8px"><strong>家庭人员</strong></td>
-              <td style="border:1px solid #333;padding:8px" colspan="3">{{ printData.family_members || '-' }}</td>
-            </tr>
+            <tbody>
+              <tr>
+                <td style="border:1px solid #333;padding:8px"><strong>姓名</strong></td>
+                <td style="border:1px solid #333;padding:8px">{{ printData.name }}</td>
+                <td style="border:1px solid #333;padding:8px"><strong>性别</strong></td>
+                <td style="border:1px solid #333;padding:8px">{{ printData.gender }}</td>
+              </tr>
+              <tr>
+                <td style="border:1px solid #333;padding:8px"><strong>年龄</strong></td>
+                <td style="border:1px solid #333;padding:8px">{{ printData.age }}岁</td>
+                <td style="border:1px solid #333;padding:8px"><strong>身高</strong></td>
+                <td style="border:1px solid #333;padding:8px">{{ printData.height || '-' }}cm</td>
+              </tr>
+              <tr>
+                <td style="border:1px solid #333;padding:8px"><strong>婚姻状况</strong></td>
+                <td style="border:1px solid #333;padding:8px">{{ printData.marital_status }}</td>
+                <td style="border:1px solid #333;padding:8px"><strong>学历</strong></td>
+                <td style="border:1px solid #333;padding:8px">{{ printData.education }}</td>
+              </tr>
+              <tr>
+                <td style="border:1px solid #333;padding:8px"><strong>职业</strong></td>
+                <td style="border:1px solid #333;padding:8px">{{ printData.occupation }}</td>
+                <td style="border:1px solid #333;padding:8px"><strong>现居住地</strong></td>
+                <td style="border:1px solid #333;padding:8px">{{ printData.current_residence }}</td>
+              </tr>
+              <tr>
+                <td style="border:1px solid #333;padding:8px"><strong>联系方式</strong></td>
+                <td style="border:1px solid #333;padding:8px">{{ printData.contact }}</td>
+                <td style="border:1px solid #333;padding:8px"><strong>生肖</strong></td>
+                <td style="border:1px solid #333;padding:8px">{{ printData.zodiac || '-' }}</td>
+              </tr>
+              <tr>
+                <td style="border:1px solid #333;padding:8px"><strong>收入</strong></td>
+                <td style="border:1px solid #333;padding:8px">{{ printData.income || '-' }}</td>
+                <td style="border:1px solid #333;padding:8px"><strong>性格</strong></td>
+                <td style="border:1px solid #333;padding:8px">{{ printData.personality || '-' }}</td>
+              </tr>
+              <tr>
+                <td style="border:1px solid #333;padding:8px"><strong>家庭人员</strong></td>
+                <td style="border:1px solid #333;padding:8px" colspan="3">{{ printData.family_members || '-' }}</td>
+              </tr>
+            </tbody>
           </table>
 
           <h3 style="font-family:'微软雅黑';margin-top:20px;margin-bottom:10px;color:#333">个人情况及信息补充：</h3>
@@ -962,6 +1004,107 @@
     .watermark {
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
+    }
+  }
+
+  /* ====== 响应式样式 ====== */
+  /* 默认：隐藏移动端元素 */
+  .mobile-only {
+    display: none;
+  }
+
+  /* 移动端卡片列表 */
+  .mobile-card-list {
+    display: none;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .member-card {
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .member-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .member-card-header {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .member-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .member-card-row {
+    display: flex;
+    font-size: 14px;
+  }
+
+  .member-card-row .label {
+    color: #909399;
+    min-width: 60px;
+  }
+
+  .member-card-row .value {
+    color: #303133;
+  }
+
+  .member-card-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #ebeef5;
+  }
+
+  /* 响应式断点 */
+  @media (max-width: 768px) {
+
+    /* 桌面端表格隐藏，手机端卡片显示 */
+    .member-table {
+      display: none;
+    }
+
+    .mobile-card-list {
+      display: flex;
+    }
+
+    /* 搜索筛选区域 */
+    .search-section {
+      padding: 12px;
+    }
+
+    .action-buttons {
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .action-buttons .el-button {
+      margin: 0;
+    }
+
+    .filter-section {
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .filter-input,
+    .filter-select,
+    .filter-number {
+      width: 100% !important;
+    }
+
+    .pagination-wrapper {
+      flex-wrap: wrap;
+      gap: 10px;
     }
   }
 </style>

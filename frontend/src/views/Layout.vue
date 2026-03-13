@@ -1,7 +1,28 @@
 <template>
   <el-container class="layout">
-    <!-- 左侧 aside -->
-    <el-aside class="layout-aside">
+    <!-- 移动端：侧边栏改为抽屉 -->
+    <el-drawer v-model="drawerVisible" direction="ltr" size="210px" :show-close="false" class="mobile-drawer">
+      <div class="drawer-logo">
+        <el-icon :size="24" color="#409eff">
+          <Connection />
+        </el-icon>
+        <span class="logo-text">丽姐·锦绣谱</span>
+      </div>
+      <el-menu :default-active="activeMenu" class="layout-menu" background-color="#1d2939" text-color="#8b949e"
+        active-text-color="#fff" :router="true" @select="handleMenuSelect">
+        <template v-for="menu in dynamicMenus" :key="menu.id">
+          <el-menu-item :index="menu.path">
+            <el-icon>
+              <component :is="menu.icon || 'Menu'" />
+            </el-icon>
+            <template #title>{{ menu.name }}</template>
+          </el-menu-item>
+        </template>
+      </el-menu>
+    </el-drawer>
+
+    <!-- 左侧 aside（桌面端） -->
+    <el-aside class="layout-aside desktop-only">
       <div class="aside-box" :style="{ width: isCollapse ? '65px' : '210px' }">
         <!-- Logo 部分 -->
         <div class="logo flx-center">
@@ -34,7 +55,12 @@
       <!-- 右侧顶部导航 -->
       <el-header class="section-header">
         <div class="header-left">
-          <el-icon class="collapse-icon" @click="handleCollapse">
+          <!-- 移动端：汉堡菜单 -->
+          <el-icon class="collapse-icon mobile-only" @click="drawerVisible = true">
+            <Menu />
+          </el-icon>
+          <!-- 桌面端：收缩按钮 -->
+          <el-icon class="collapse-icon desktop-only" @click="handleCollapse">
             <component :is="isCollapse ? 'Expand' : 'Fold'" />
           </el-icon>
           <el-breadcrumb separator="/" class="breadcrumb">
@@ -88,6 +114,7 @@
 
   // 侧边栏收缩状态
   const isCollapse = ref(false)
+  const drawerVisible = ref(false) // 移动端抽屉
   const username = ref('Admin')
   const dynamicMenus = ref([])
 
@@ -112,6 +139,11 @@
   // 收缩/展开侧边栏
   const handleCollapse = () => {
     isCollapse.value = !isCollapse.value
+  }
+
+  // 移动端：菜单选中后关闭抽屉
+  const handleMenuSelect = () => {
+    drawerVisible.value = false
   }
 
   // 获取用户名和菜单
@@ -362,5 +394,49 @@
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+
+  /* ====== 响应式样式 ====== */
+  /* 显示/隐藏控制 */
+  .mobile-only {
+    display: none;
+  }
+  .desktop-only {
+    display: block;
+  }
+
+  /* 移动端抽屉 */
+  .mobile-drawer .el-drawer__body {
+    padding: 0;
+    background: #1d2939;
+  }
+  .drawer-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 55px;
+    padding: 0 20px;
+    color: white;
+    background: #1d2939;
+  }
+  .drawer-logo .logo-text {
+    font-size: 18px;
+    font-weight: bold;
+  }
+  .mobile-drawer .layout-menu {
+    border-right: none;
+  }
+
+  /* 响应式断点：768px 以下 */
+  @media (max-width: 768px) {
+    .mobile-only {
+      display: block;
+    }
+    .desktop-only {
+      display: none;
+    }
+    .main-content {
+      padding: 12px;
+    }
   }
 </style>
