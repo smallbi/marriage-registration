@@ -57,6 +57,7 @@
 <script setup>
   import { ref, onMounted } from 'vue'
   import { UserFilled, Calendar } from '@element-plus/icons-vue'
+  import { API_BASE_URL } from '../config/api'
 
   const stats = ref({
     total: 0,
@@ -70,7 +71,7 @@
 
   const fetchStats = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/stats')
+      const response = await fetch(`${API_BASE_URL}/stats`)
       if (response.ok) {
         stats.value = await response.json()
       }

@@ -94,6 +94,49 @@
           </el-form-item>
         </el-col>
 
+        <!-- 生肖 - 必填 -->
+        <el-col :span="12" :xs="24">
+          <el-form-item label="生肖" prop="zodiac">
+            <el-select v-model="form.zodiac" placeholder="请选择生肖" style="width: 100%">
+              <el-option v-for="z in zodiacOptions" :key="z" :value="z" :label="z" />
+            </el-select>
+          </el-form-item>
+        </el-col>
+
+        <!-- 性格 - 非必填 -->
+        <el-col :span="12" :xs="24">
+          <el-form-item label="性格">
+            <el-input v-model="form.personality" placeholder="请输入性格特点（选填）" />
+          </el-form-item>
+        </el-col>
+
+        <!-- 家庭人员 - 非必填 -->
+        <el-col :span="12" :xs="24">
+          <el-form-item label="家庭人员">
+            <el-input v-model="form.family_members" placeholder="如：父亲、母亲、弟弟（选填）" />
+          </el-form-item>
+        </el-col>
+
+        <!-- 房车情况 - 非必填 -->
+        <el-col :span="12" :xs="24">
+          <el-form-item label="房车情况">
+            <el-input v-model="form.property" placeholder="如有房车请说明情况（选填）" />
+          </el-form-item>
+        </el-col>
+
+        <!-- 照片上传 - 已禁用 -->
+        <!--
+        <el-col :span="24">
+          <el-form-item label="照片" prop="photos">
+            <el-upload action="#" :auto-upload="false" list-type="picture-card" :on-change="handlePhotoChange"
+              :file-list="photoList" :on-remove="handlePhotoRemove" :limit="5">
+              <el-icon><Plus /></el-icon>
+            </el-upload>
+            <div class="el-upload__tip">请上传至少1张照片，最多5张</div>
+          </el-form-item>
+        </el-col>
+        -->
+
         <!-- 择偶要求 -->
         <el-col :span="24">
           <el-form-item label="择偶要求">
@@ -131,7 +174,8 @@
 <script setup>
   import { ref, reactive, watch, onMounted } from 'vue'
   import { ElMessage } from 'element-plus'
-  import { Edit, Check, Close } from '@element-plus/icons-vue'
+  import { Edit, Check, Close, Plus } from '@element-plus/icons-vue'
+  import { API_BASE_URL } from '../config/api'
 
   const emit = defineEmits(['success', 'cancel'])
   const props = defineProps({
@@ -143,6 +187,25 @@
 
   const formRef = ref(null)
   const loading = ref(false)
+
+  // 生肖选项
+  const zodiacOptions = ['鼠', '牛', '虎', '兔', '龙', '蛇', '马', '羊', '猴', '鸡', '狗', '猪']
+
+  // 照片列表
+  const photoList = ref([])
+  const photoFiles = ref([])
+
+  // 照片变化处理
+  const handlePhotoChange = (uploadFile, uploadFiles) => {
+    photoList.value = uploadFiles
+    photoFiles.value = uploadFiles.map(f => f.raw)
+  }
+
+  // 照片移除处理
+  const handlePhotoRemove = (file, uploadFiles) => {
+    photoList.value = uploadFiles
+    photoFiles.value = uploadFiles.map(f => f.raw)
+  }
 
   // 表单数据
   const form = reactive({
@@ -158,6 +221,11 @@
     contact: '',
     height: null,
     income: '',
+    zodiac: '',
+    personality: '',
+    family_members: '',
+    property: '',
+    photos: '',
     partner_requirement: '',
     remark: ''
   })
@@ -213,6 +281,9 @@
     ],
     contact: [
       { required: true, message: '请输入联系方式', trigger: 'blur' }
+    ],
+    zodiac: [
+      { required: true, message: '请选择生肖', trigger: 'change' }
     ]
   }
 
@@ -223,9 +294,33 @@
     await formRef.value.validate(async (valid) => {
       if (!valid) return
 
+      // 验证照片 - 已禁用
+      // if (photoFiles.value.length === 0 && !form.photos) {
+      //   ElMessage.warning('请上传至少1张照片')
+      //   return
+      // }
+
       loading.value = true
 
       try {
+        // 处理照片上传 - 已禁用
+        let photosJson = ''
+        // if (photoFiles.value.length > 0) {
+        //   const photoFormData = new FormData()
+        //   photoFiles.value.forEach(file => {
+        //     photoFormData.append('photos', file)
+        //   })
+        //   const photoResponse = await fetch(`${API_BASE_URL}/members/upload-photos`, {
+        //     method: 'POST',
+        //     body: photoFormData
+        //   })
+        //   if (!photoResponse.ok) {
+        //     throw new Error('照片上传失败')
+        //   }
+        //   const photoData = await photoResponse.json()
+        //   photosJson = JSON.stringify(photoData.urls)
+        // }
+
         // 构建请求数据
         const data = {
           name: form.name.trim(),
@@ -237,18 +332,25 @@
           hukou_location: form.hukou_location.trim(),
           current_residence: form.current_residence.trim(),
           contact: form.contact.trim(),
+          zodiac: form.zodiac,
+          photos: photosJson
         }
 
         // 可选字段
         if (form.height) data.height = form.height
         if (form.income) data.income = form.income.trim()
+        if (form.personality) data.personality = form.personality.trim()
+        if (form.family_members) data.family_members = form.family_members.trim()
+        if (form.property) data.property = form.property.trim()
         if (form.partner_requirement) data.partner_requirement = form.partner_requirement.trim()
         if (form.remark) data.remark = form.remark.trim()
+        // 照片字段 - 已禁用，固定为空
+        data.photos = ''
 
         // 根据是否有id决定是新增还是编辑
         const url = form.id 
-          ? `http://localhost:8000/api/members/${form.id}` 
-          : 'http://localhost:8000/api/members'
+          ? `${API_BASE_URL}/members/${form.id}` 
+          : `${API_BASE_URL}/members`
         const method = form.id ? 'PUT' : 'POST'
 
         const response = await fetch(url, {
@@ -269,8 +371,15 @@
         form.id = ''
         form.height = null
         form.income = ''
+        form.zodiac = ''
+        form.personality = ''
+        form.family_members = ''
+        form.property = ''
+        form.photos = ''
         form.partner_requirement = ''
         form.remark = ''
+        photoList.value = []
+        photoFiles.value = []
 
         emit('success', form.id ? '人员信息编辑成功！🎉' : '人员信息提交成功！🎉')
       } catch (error) {

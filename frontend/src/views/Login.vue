@@ -6,7 +6,7 @@
       </div>
       <div class="login-form">
         <div class="login-logo">
-          <h2 class="logo-text">婚介信息管理</h2>
+          <h2 class="logo-text">丽姐·锦绣谱</h2>
         </div>
         <el-form ref="loginFormRef" :model="loginForm" :rules="loginRules" size="large">
           <el-form-item prop="username">
@@ -46,6 +46,7 @@
   import { ElMessage } from 'element-plus'
   import { Connection, User, Lock } from '@element-plus/icons-vue'
   import loginLeftImg from '../assets/images/login_left.png'
+  import { API_BASE_URL } from '../config/api'
 
   const router = useRouter()
   const loginFormRef = ref(null)
@@ -79,7 +80,7 @@
 
       try {
         // 使用登录接口进行验证
-        const response = await fetch('http://localhost:8000/api/login', {
+        const response = await fetch(`${API_BASE_URL}/login`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -95,6 +96,13 @@
           // 保存登录状态
           localStorage.setItem('isLoggedIn', 'true')
           localStorage.setItem('username', loginForm.username)
+          // 保存菜单和角色到localStorage
+          if (result.menus) {
+            localStorage.setItem('menus', JSON.stringify(result.menus))
+          }
+          if (result.roles) {
+            localStorage.setItem('roles', JSON.stringify(result.roles))
+          }
 
           ElMessage.success('登录成功，欢迎回来！')
           router.push('/')

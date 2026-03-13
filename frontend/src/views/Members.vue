@@ -10,6 +10,7 @@
   import { useRoute } from 'vue-router'
   import { ElMessage, ElMessageBox } from 'element-plus'
   import MemberList from '../components/MemberList.vue'
+  import { API_BASE_URL } from '../config/api'
 
   const route = useRoute()
 
@@ -18,17 +19,29 @@
   // 删除记录
   const onDelete = async (record) => {
     try {
+      // 第一次确认
       await ElMessageBox.confirm(
         `确定要删除人员 "${record.name}" 的信息吗？`,
         '删除确认',
         {
-          confirmButtonText: '确定删除',
+          confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning',
         }
       )
 
-      const response = await fetch(`http://localhost:8000/api/members/${record.id}`, {
+      // 第二次确认
+      await ElMessageBox.confirm(
+        `再次确认要删除人员 "${record.name}" 的信息吗？删除后无法恢复。`,
+        '再次确认',
+        {
+          confirmButtonText: '确认删除',
+          cancelButtonText: '取消',
+          type: 'danger',
+        }
+      )
+
+      const response = await fetch(`${API_BASE_URL}/members/${record.id}`, {
         method: 'DELETE'
       })
 
@@ -48,7 +61,5 @@
 </script>
 
 <style scoped>
-  .members-page {
-    padding: 20px;
-  }
+
 </style>

@@ -5,7 +5,7 @@
         <el-icon>
           <List />
         </el-icon>
-        <span>人员信息</span>
+        <span>会员信息</span>
       </div>
     </template>
 
@@ -16,7 +16,7 @@
         <el-button type="primary" @click="showForm = true">
           <el-icon>
             <Plus />
-          </el-icon> 新增人员
+          </el-icon> 新增会员
         </el-button>
         <el-button type="primary" @click="handleRefresh">
           <el-icon>
@@ -32,6 +32,11 @@
           <el-icon>
             <Download />
           </el-icon> 导出数据
+        </el-button>
+        <el-button type="danger" @click="handleBatchDelete" :disabled="selectedRows.length === 0">
+          <el-icon>
+            <Delete />
+          </el-icon> 批量删除
         </el-button>
       </div>
 
@@ -78,7 +83,8 @@
 
     <!-- 表格 -->
     <el-table :data="members" v-loading="loading" stripe border class="member-table" empty-text="暂无人员记录"
-      @sort-change="handleSortChange">
+      @sort-change="handleSortChange" @selection-change="handleSelectionChange">
+      <el-table-column type="selection" width="55" />
       <el-table-column prop="member_no" label="人员编号" width="180" sortable="custom">
         <template #default="{ row }">
           <el-tag size="small" type="info">{{ row.member_no }}</el-tag>
@@ -116,6 +122,24 @@
 
       <el-table-column prop="contact" label="联系方式" width="130" />
 
+      <el-table-column prop="zodiac" label="生肖" width="80" />
+
+      <el-table-column prop="personality" label="性格" width="100" show-overflow-tooltip />
+
+      <el-table-column prop="family_members" label="家庭人员" width="120" show-overflow-tooltip />
+
+      <el-table-column prop="property" label="房车情况" width="120" show-overflow-tooltip />
+
+      <!-- 照片列 - 已禁用 -->
+      <!--
+      <el-table-column label="照片" width="80">
+        <template #default="{ row }">
+          <el-image v-if="row.photos" :src="(JSON.parse(row.photos) || [])[0]" fit="cover"
+            style="width:40px;height:40px" :preview-src-list="JSON.parse(row.photos)" preview-teleported />
+        </template>
+      </el-table-column>
+      -->
+
       <el-table-column prop="registration_time" label="登记时间" width="160" sortable="custom">
         <template #default="{ row }">
           {{ formatDate(row.registration_time) }}
@@ -132,6 +156,11 @@
           <el-button size="small" type="warning" text @click="editMember(row)">
             <el-icon>
               <Edit />
+            </el-icon>
+          </el-button>
+          <el-button size="small" type="info" text @click="handlePrint(row)">
+            <el-icon>
+              <Printer />
             </el-icon>
           </el-button>
           <el-button size="small" type="danger" text @click="$emit('delete', row)">
@@ -191,6 +220,29 @@
         <el-descriptions-item label="联系方式">
           {{ currentDetail.contact }}
         </el-descriptions-item>
+        <el-descriptions-item label="生肖">
+          {{ currentDetail.zodiac || '-' }}
+        </el-descriptions-item>
+        <el-descriptions-item label="性格" v-if="currentDetail.personality">
+          {{ currentDetail.personality }}
+        </el-descriptions-item>
+        <el-descriptions-item label="家庭人员" v-if="currentDetail.family_members">
+          {{ currentDetail.family_members }}
+        </el-descriptions-item>
+        <el-descriptions-item label="房车情况" v-if="currentDetail.property">
+          {{ currentDetail.property }}
+        </el-descriptions-item>
+        <!-- 照片展示 - 已禁用 -->
+        <!--
+        <el-descriptions-item label="照片" :span="2" v-if="currentDetail.photos">
+          <div class="detail-photos">
+            <el-image v-for="(photo, index) in (currentDetail.photos ? JSON.parse(currentDetail.photos) : [])"
+              :key="index" :src="photo"
+              :preview-src-list="(currentDetail.photos ? JSON.parse(currentDetail.photos) : [])" :initial-index="index"
+              fit="cover" style="width:80px;height:80px;margin-right:8px" preview-teleported />
+          </div>
+        </el-descriptions-item>
+        -->
         <el-descriptions-item label="身高">
           {{ currentDetail.height ? currentDetail.height + 'cm' : '-' }}
         </el-descriptions-item>
@@ -219,14 +271,173 @@
     <el-dialog v-model="showEditForm" title="编辑人员信息" width="800px" destroy-on-close>
       <MemberForm :initial-data="currentEditItem" @success="onEditSuccess" @cancel="showEditForm = false" />
     </el-dialog>
+
+    <!-- 打印预览弹窗 -->
+    <el-dialog v-model="printDialogVisible" title="打印预览" width="800px" destroy-on-close>
+      <el-select v-model="printTemplate" style="margin-bottom:20px;width:200px" placeholder="选择打印模板">
+        <el-option value="classic" label="经典版" />
+        <el-option value="minimal" label="极简版" />
+      </el-select>
+
+      <!-- 打印内容 -->
+      <div class="print-preview" :class="printTemplate">
+        <div class="watermark">丽姐·锦绣谱</div>
+
+        <!-- 经典版 -->
+        <div v-if="printTemplate === 'classic'" class="print-content-classic">
+          <h2 style="text-align:center;font-family:'微软雅黑';margin-bottom:20px;color:#333">丽姐·锦绣谱信息表</h2>
+
+          <table style="width:100%;border-collapse:collapse;font-family:'微软雅黑';font-size:14px;margin-bottom:20px">
+            <tr>
+              <td style="border:1px solid #333;padding:8px"><strong>姓名</strong></td>
+              <td style="border:1px solid #333;padding:8px">{{ printData.name }}</td>
+            </tr>
+            <tr>
+              <td style="border:1px solid #333;padding:8px"><strong>性别</strong></td>
+              <td style="border:1px solid #333;padding:8px">{{ printData.gender }}</td>
+            </tr>
+            <tr>
+              <td style="border:1px solid #333;padding:8px"><strong>年龄</strong></td>
+              <td style="border:1px solid #333;padding:8px">{{ printData.age }}岁</td>
+            </tr>
+            <tr>
+              <td style="border:1px solid #333;padding:8px"><strong>学历</strong></td>
+              <td style="border:1px solid #333;padding:8px">{{ printData.education }}</td>
+            </tr>
+            <tr>
+              <td style="border:1px solid #333;padding:8px"><strong>身高</strong></td>
+              <td style="border:1px solid #333;padding:8px">{{ printData.height || '-' }}cm</td>
+            </tr>
+            <tr>
+              <td style="border:1px solid #333;padding:8px"><strong>职业</strong></td>
+              <td style="border:1px solid #333;padding:8px">{{ printData.occupation }}</td>
+            </tr>
+            <tr>
+              <td style="border:1px solid #333;padding:8px"><strong>身高</strong></td>
+              <td style="border:1px solid #333;padding:8px">{{ printData.height || '-' }}cm</td>
+            </tr>
+            <tr>
+              <td style="border:1px solid #333;padding:8px"><strong>现居住地</strong></td>
+              <td style="border:1px solid #333;padding:8px">{{ printData.current_residence }}</td>
+            </tr>
+            <tr>
+              <td style="border:1px solid #333;padding:8px"><strong>联系方式</strong></td>
+              <td style="border:1px solid #333;padding:8px">{{ printData.contact }}</td>
+            </tr>
+            <tr>
+              <td style="border:1px solid #333;padding:8px"><strong>生肖</strong></td>
+              <td style="border:1px solid #333;padding:8px">{{ printData.zodiac || '-' }}</td>
+            </tr>
+            <tr>
+              <td style="border:1px solid #333;padding:8px"><strong>性格</strong></td>
+              <td style="border:1px solid #333;padding:8px">{{ printData.personality || '-' }}</td>
+            </tr>
+            <tr>
+              <td style="border:1px solid #333;padding:8px"><strong>家庭人员</strong></td>
+              <td style="border:1px solid #333;padding:8px">{{ printData.family_members || '-' }}</td>
+            </tr>
+          </table>
+
+          <hr style="border:1px solid #ddd;margin:20px 0" />
+
+          <h3 style="font-family:'微软雅黑';margin-top:20px;margin-bottom:10px;color:#333">个人情况及补充信息</h3>
+          <div style="border:1px solid #ddd;padding:10px;margin-bottom:20px;min-height:100px;font-family:'微软雅黑';">
+            {{ printData.remark || '' }}
+          </div>
+
+          <hr style="border:1px solid #ddd;margin:20px 0" />
+
+          <h3 style="font-family:'微软雅黑';margin-top:20px;margin-bottom:10px;color:#333">择偶要求</h3>
+          <div style="border:1px solid #ddd;padding:10px;margin-bottom:30px;min-height:100px;font-family:'微软雅黑';">
+            {{ printData.partner_requirement || '无' }}
+          </div>
+
+          <hr style="border:1px solid #ddd;margin:20px 0" />
+
+          <p style="text-align:center;font-family:'微软雅黑';font-size:14px;margin-top:30px">
+            温馨提示：本信息内容由登记人提供真实信息；丽姐仅提供平台，不收取任何费用；谨防诈骗。
+          </p>
+        </div>
+
+
+
+        <!-- 极简版 -->
+        <div v-else class="print-content-minimal">
+          <h2 style="text-align:center;font-family:'微软雅黑';margin-bottom:20px;color:#333">丽姐·锦绣谱信息表</h2>
+
+          <table style="width:100%;border-collapse:collapse;font-family:'微软雅黑';font-size:14px;margin-bottom:20px">
+            <tr>
+              <td style="border:1px solid #333;padding:8px"><strong>姓名</strong></td>
+              <td style="border:1px solid #333;padding:8px">{{ printData.name }}</td>
+              <td style="border:1px solid #333;padding:8px"><strong>性别</strong></td>
+              <td style="border:1px solid #333;padding:8px">{{ printData.gender }}</td>
+            </tr>
+            <tr>
+              <td style="border:1px solid #333;padding:8px"><strong>年龄</strong></td>
+              <td style="border:1px solid #333;padding:8px">{{ printData.age }}岁</td>
+              <td style="border:1px solid #333;padding:8px"><strong>身高</strong></td>
+              <td style="border:1px solid #333;padding:8px">{{ printData.height || '-' }}cm</td>
+            </tr>
+            <tr>
+              <td style="border:1px solid #333;padding:8px"><strong>婚姻状况</strong></td>
+              <td style="border:1px solid #333;padding:8px">{{ printData.marital_status }}</td>
+              <td style="border:1px solid #333;padding:8px"><strong>学历</strong></td>
+              <td style="border:1px solid #333;padding:8px">{{ printData.education }}</td>
+            </tr>
+            <tr>
+              <td style="border:1px solid #333;padding:8px"><strong>职业</strong></td>
+              <td style="border:1px solid #333;padding:8px">{{ printData.occupation }}</td>
+              <td style="border:1px solid #333;padding:8px"><strong>现居住地</strong></td>
+              <td style="border:1px solid #333;padding:8px">{{ printData.current_residence }}</td>
+            </tr>
+            <tr>
+              <td style="border:1px solid #333;padding:8px"><strong>联系方式</strong></td>
+              <td style="border:1px solid #333;padding:8px">{{ printData.contact }}</td>
+              <td style="border:1px solid #333;padding:8px"><strong>生肖</strong></td>
+              <td style="border:1px solid #333;padding:8px">{{ printData.zodiac || '-' }}</td>
+            </tr>
+            <tr>
+              <td style="border:1px solid #333;padding:8px"><strong>收入</strong></td>
+              <td style="border:1px solid #333;padding:8px">{{ printData.income || '-' }}</td>
+              <td style="border:1px solid #333;padding:8px"><strong>性格</strong></td>
+              <td style="border:1px solid #333;padding:8px">{{ printData.personality || '-' }}</td>
+            </tr>
+            <tr>
+              <td style="border:1px solid #333;padding:8px"><strong>家庭人员</strong></td>
+              <td style="border:1px solid #333;padding:8px" colspan="3">{{ printData.family_members || '-' }}</td>
+            </tr>
+          </table>
+
+          <h3 style="font-family:'微软雅黑';margin-top:20px;margin-bottom:10px;color:#333">个人情况及信息补充：</h3>
+          <div style="border:1px solid #ddd;padding:10px;margin-bottom:20px;min-height:100px;">
+            {{ printData.remark || '无' }}
+          </div>
+
+          <h3 style="font-family:'微软雅黑';margin-top:20px;margin-bottom:10px;color:#333">择偶标准：</h3>
+          <div style="border:1px solid #ddd;padding:10px;margin-bottom:30px;min-height:100px;">
+            {{ printData.partner_requirement || '无' }}
+          </div>
+
+          <div style="font-size:12px;color:#666;line-height:1.5;">
+            <p>温馨提示：本信息内容由登记人提供真实信息；丽姐仅提供平台，不收取任何费用；谨防诈骗。</p>
+          </div>
+        </div>
+      </div>
+
+      <template #footer>
+        <el-button @click="printDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="confirmPrint">打印</el-button>
+      </template>
+    </el-dialog>
   </el-card>
 </template>
 
 <script setup>
   import { ref, reactive, onMounted, defineEmits, defineProps, watch } from 'vue'
   import { ElMessage, ElMessageBox } from 'element-plus'
-  import { List, Search, View, Delete, Edit, Plus, Refresh, RefreshLeft, Download } from '@element-plus/icons-vue'
+  import { List, Search, View, Delete, Edit, Plus, Refresh, RefreshLeft, Download, Printer } from '@element-plus/icons-vue'
   import MemberForm from './MemberForm.vue'
+  import { API_BASE_URL } from '../config/api'
 
   const emit = defineEmits(['delete'])
   const props = defineProps({
@@ -242,6 +453,7 @@
   const page = ref(1)
   const pageSize = ref(10)
   const total = ref(0)
+  const selectedRows = ref([])
 
   // 筛选条件
   const filters = reactive({
@@ -265,6 +477,67 @@
   // 编辑人员弹窗
   const showEditForm = ref(false)
   const currentEditItem = ref({})
+
+  // 打印相关
+  const printDialogVisible = ref(false)
+  const printTemplate = ref('classic')
+  const printData = ref({})
+
+  // 打印方法
+  const handlePrint = (row) => {
+    printData.value = { ...row }
+    printDialogVisible.value = true
+  }
+
+  const confirmPrint = () => {
+    const printContent = document.querySelector('.print-preview')
+    if (!printContent) return
+
+    const printWindow = window.open('', '_blank')
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>打印会员资料</title>
+        <style>
+          body { margin: 20px; }
+          .print-preview { position: relative; padding: 20px; background: #fff; }
+          .print-preview.classic { font-family: "宋体"; }
+          .print-preview.modern { font-family: "微软雅黑"; }
+          .print-preview.minimal { font-family: "Arial"; }
+          table { border-collapse: collapse; }
+          table td { border: 1px solid #333; padding: 8px; }
+          .watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-30deg);
+            font-size: 60px;
+            color: rgba(0, 0, 0, 0.05);
+            pointer-events: none;
+            white-space: nowrap;
+            z-index: 0;
+          }
+          .print-content-classic, .print-content-modern, .print-content-minimal {
+            position: relative;
+            z-index: 1;
+          }
+          @media print {
+            body { margin: 0; }
+            .watermark { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+          }
+        </style>
+      </head>
+      <body>${printContent.innerHTML}</body>
+      </html>
+    `)
+    printWindow.document.close()
+    printWindow.focus()
+    setTimeout(() => {
+      printWindow.print()
+      printWindow.close()
+    }, 500)
+  }
 
   // 格式化日期
   const formatDate = (dateStr) => {
@@ -346,7 +619,7 @@
       if (filters.education) params.append('education', filters.education)
       if (filters.marital_status) params.append('marital_status', filters.marital_status)
 
-      const response = await fetch(`http://localhost:8000/api/members/export?${params}`)
+      const response = await fetch(`${API_BASE_URL}/members/export?${params}`)
 
       if (!response.ok) {
         throw new Error('导出失败')
@@ -456,7 +729,7 @@
       if (filters.education) params.append('education', filters.education)
       if (filters.marital_status) params.append('marital_status', filters.marital_status)
 
-      const response = await fetch(`http://localhost:8000/api/members?${params}`)
+      const response = await fetch(`${API_BASE_URL}/members?${params}`)
 
       if (!response.ok) {
         throw new Error('获取数据失败')
@@ -497,6 +770,66 @@
       fetchMembers()
     }
   }, { deep: true })
+
+  // 处理选择变化
+  const handleSelectionChange = (selection) => {
+    selectedRows.value = selection
+  }
+
+  // 批量删除
+  const handleBatchDelete = async () => {
+    if (selectedRows.value.length === 0) return
+
+    try {
+      // 第一次确认
+      await ElMessageBox.confirm(
+        `确定要删除选中的 ${selectedRows.value.length} 条记录吗？`,
+        '批量删除确认',
+        {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning',
+        }
+      )
+
+      // 第二次确认
+      await ElMessageBox.confirm(
+        `再次确认要删除选中的 ${selectedRows.value.length} 条记录吗？删除后无法恢复。`,
+        '再次确认',
+        {
+          confirmButtonText: '确认删除',
+          cancelButtonText: '取消',
+          type: 'danger',
+        }
+      )
+
+      // 批量删除逻辑
+      const response = await fetch(`${API_BASE_URL}/members/batch-delete`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          ids: selectedRows.value.map(row => row.id)
+        })
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        ElMessage.success(`删除成功，共删除 ${result.deleted_count} 条记录`)
+        // 清空选择
+        selectedRows.value = []
+        // 刷新列表
+        fetchMembers()
+      } else {
+        ElMessage.error('删除失败')
+      }
+    } catch (error) {
+      if (error !== 'cancel') {
+        ElMessage.error('删除失败: ' + error.message)
+      }
+    }
+  }
 
   // 暴露方法给父组件
   defineExpose({
@@ -577,6 +910,58 @@
     .filter-select,
     .filter-number {
       width: 100%;
+    }
+  }
+
+  /* 打印样式 */
+  .print-preview {
+    position: relative;
+    padding: 20px;
+    background: #fff;
+    min-height: 300px;
+  }
+
+  .print-preview.classic {
+    font-family: "宋体";
+  }
+
+  .print-preview.modern {
+    font-family: "微软雅黑";
+  }
+
+  .print-preview.minimal {
+    font-family: "Arial";
+  }
+
+  .watermark {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-30deg);
+    font-size: 60px;
+    color: rgba(0, 0, 0, 0.05);
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 0;
+  }
+
+  .print-content-classic,
+  .print-content-modern,
+  .print-content-minimal {
+    position: relative;
+    z-index: 1;
+  }
+
+  .detail-photos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  @media print {
+    .watermark {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
     }
   }
 </style>

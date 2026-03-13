@@ -116,6 +116,7 @@
   import { CanvasRenderer } from 'echarts/renderers'
   import 'echarts-liquidfill'
   import { UserFilled, User, Calendar, PieChart as IconPieChart, DataLine, Histogram, House, Odometer } from '@element-plus/icons-vue'
+  import { API_BASE_URL } from '../config/api'
 
   const router = useRouter()
 
@@ -229,7 +230,7 @@
 
   const fetchStats = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/stats')
+      const response = await fetch(`${API_BASE_URL}/stats`)
       if (response.ok) {
         const data = await response.json()
         stats.value = data
@@ -248,7 +249,6 @@
 
 <style scoped>
   .stats-page {
-    padding: 20px;
     max-width: 1600px;
     margin: 0 auto;
   }

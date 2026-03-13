@@ -7,7 +7,7 @@ export default defineConfig({
     port: 3000,
     proxy: {
       '/api': {
-        target: 'http://localhost:8000',
+        target: 'https://mixinkoma-7gt4hjdoc70dd03b-1317071406.ap-shanghai.app.tcloudbase.com',
         changeOrigin: true
       }
     }

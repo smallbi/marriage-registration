@@ -8,36 +8,22 @@
           <el-icon :size="24" color="#409eff">
             <Connection />
           </el-icon>
-          <span v-show="!isCollapse" class="logo-text">婚介信息管理</span>
+          <span v-show="!isCollapse" class="logo-text">丽姐·锦绣谱</span>
         </div>
 
         <!-- 导航菜单 -->
         <el-scrollbar>
           <el-menu :default-active="activeMenu" class="layout-menu" background-color="#1d2939" text-color="#8b949e"
             active-text-color="#fff" :router="true" :collapse="isCollapse" :collapse-transition="false">
-            <!-- 统计 -->
-            <el-menu-item index="/stats">
-              <el-icon>
-                <DataAnalysis />
-              </el-icon>
-              <template #title>数据统计</template>
-            </el-menu-item>
-
-            <!-- 人员记录 -->
-            <el-menu-item index="/members">
-              <el-icon>
-                <User />
-              </el-icon>
-              <template #title>人员记录</template>
-            </el-menu-item>
-
-            <!-- 用户管理 -->
-            <el-menu-item index="/users">
-              <el-icon>
-                <UserFilled />
-              </el-icon>
-              <template #title>用户管理</template>
-            </el-menu-item>
+            <!-- 动态菜单 -->
+            <template v-for="menu in dynamicMenus" :key="menu.id">
+              <el-menu-item :index="menu.path">
+                <el-icon>
+                  <component :is="menu.icon || 'Menu'" />
+                </el-icon>
+                <template #title>{{ menu.name }}</template>
+              </el-menu-item>
+            </template>
           </el-menu>
         </el-scrollbar>
       </div>
@@ -95,7 +81,7 @@
   import { ref, computed, onMounted } from 'vue'
   import { useRouter, useRoute } from 'vue-router'
   import { ElMessage, ElMessageBox } from 'element-plus'
-  import { Connection, User, UserFilled, ArrowDown, SwitchButton, DataAnalysis, Fold, Expand } from '@element-plus/icons-vue'
+  import { Connection, User, UserFilled, ArrowDown, SwitchButton, DataAnalysis, Fold, Expand, Menu } from '@element-plus/icons-vue'
 
   const router = useRouter()
   const route = useRoute()
@@ -103,14 +89,22 @@
   // 侧边栏收缩状态
   const isCollapse = ref(false)
   const username = ref('Admin')
+  const dynamicMenus = ref([])
 
   const activeMenu = computed(() => route.path)
 
   const currentPageTitle = computed(() => {
+    // 先从动态菜单中查找
+    const menu = dynamicMenus.value.find(m => m.path === route.path)
+    if (menu) return menu.name
+    
+    // 备用静态映射
     const titles = {
       '/stats': '数据统计',
       '/members': '人员信息',
-      '/users': '用户管理'
+      '/users': '用户管理',
+      '/menus': '菜单管理',
+      '/roles': '角色管理'
     }
     return titles[route.path] || '首页'
   })
@@ -120,11 +114,30 @@
     isCollapse.value = !isCollapse.value
   }
 
-  // 获取用户名
+  // 获取用户名和菜单
   onMounted(() => {
     const savedUsername = localStorage.getItem('username')
     if (savedUsername) {
       username.value = savedUsername
+    }
+    
+    // 从localStorage加载动态菜单
+    const savedMenus = localStorage.getItem('menus')
+    if (savedMenus) {
+      try {
+        dynamicMenus.value = JSON.parse(savedMenus)
+      } catch (e) {
+        console.error('解析菜单失败:', e)
+      }
+    } else {
+      // 如果没有菜单，使用默认菜单
+      dynamicMenus.value = [
+        { id: 1, name: '数据统计', path: '/stats', icon: 'DataAnalysis' },
+        { id: 2, name: '人员记录', path: '/members', icon: 'User' },
+        { id: 3, name: '用户管理', path: '/users', icon: 'UserFilled' },
+        { id: 4, name: '菜单管理', path: '/menus', icon: 'Menu' },
+        { id: 5, name: '角色管理', path: '/roles', icon: 'UserFilled' }
+      ]
     }
   })
 
@@ -140,6 +153,7 @@
 
         localStorage.removeItem('isLoggedIn')
         localStorage.removeItem('username')
+        localStorage.removeItem('menus')
         ElMessage.success('已退出登录')
         router.push('/login')
       } catch {
