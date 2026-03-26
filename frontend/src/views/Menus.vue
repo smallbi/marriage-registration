@@ -54,7 +54,7 @@
     </el-table>
 
     <!-- 新增/编辑菜单对话框 -->
-    <el-dialog :title="dialogTitle" v-model="dialogVisible" width="500px" destroy-on-close>
+    <el-dialog :title="dialogTitle" v-model="dialogVisible" width="500px" destroy-on-close :close-on-click-modal="false">
       <el-form :model="formData" :rules="formRules" ref="formRef" label-width="100px">
         <el-form-item label="菜单名称" prop="name">
           <el-input v-model="formData.name" placeholder="请输入菜单名称" />

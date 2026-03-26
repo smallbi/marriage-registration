@@ -218,7 +218,7 @@
     </div>
 
     <!-- 详情弹窗 -->
-    <el-dialog v-model="showDetail" title="人员详情" width="750px" destroy-on-close>
+    <el-dialog v-model="showDetail" title="人员详情" width="750px" destroy-on-close :close-on-click-modal="false">
       <el-descriptions :column="2" border>
         <el-descriptions-item label="人员编号">
           {{ currentDetail.member_no }}
@@ -301,17 +301,17 @@
     </el-dialog>
 
     <!-- 新增人员弹窗 -->
-    <el-dialog v-model="showForm" title="新增人员信息" width="800px" destroy-on-close>
+    <el-dialog v-model="showForm" title="新增人员信息" width="800px" destroy-on-close :close-on-click-modal="false">
       <MemberForm @success="onFormSuccess" @cancel="showForm = false" />
     </el-dialog>
 
     <!-- 编辑人员弹窗 -->
-    <el-dialog v-model="showEditForm" title="编辑人员信息" width="800px" destroy-on-close>
+    <el-dialog v-model="showEditForm" title="编辑人员信息" width="800px" destroy-on-close :close-on-click-modal="false">
       <MemberForm :initial-data="currentEditItem" @success="onEditSuccess" @cancel="showEditForm = false" />
     </el-dialog>
 
     <!-- 打印预览弹窗 -->
-    <el-dialog v-model="printDialogVisible" title="打印预览" width="800px" destroy-on-close>
+    <el-dialog v-model="printDialogVisible" title="打印预览" width="800px" destroy-on-close :close-on-click-modal="false">
       <el-select v-model="printTemplate" style="margin-bottom:20px;width:200px" placeholder="选择打印模板">
         <el-option value="classic" label="丽姐·锦绣谱信息表" />
         <el-option value="minimal" label="极简版" />

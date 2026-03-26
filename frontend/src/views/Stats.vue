@@ -1,142 +1,132 @@
 <template>
   <div class="stats-page">
-    <!-- 第一行：统计卡片 -->
-    <el-row :gutter="20">
-      <el-col :span="6" :xs="12" :sm="12" :md="6">
-        <div class="stat-card">
-          <div class="stat-icon" style="background: rgba(64, 158, 255, 0.1);">
-            <el-icon :size="28" color="#409eff">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 stats-cards">
+      <div class="stat-card">
+        <div class="stat-header">
+          <div class="stat-icon purple">
+            <el-icon :size="20">
               <User />
             </el-icon>
           </div>
-          <div class="stat-info">
-            <div class="stat-value">{{ stats.total }}</div>
-            <div class="stat-label">人员总数</div>
-          </div>
+          <Top class="trend-icon" />
         </div>
-      </el-col>
+        <h3 class="stat-title">人员总数</h3>
+        <p class="stat-value">{{ stats.total }}</p>
+        <p class="stat-trend positive">全部登记人员</p>
+      </div>
 
-      <el-col :span="6" :xs="12" :sm="12" :md="6">
-        <div class="stat-card">
-          <div class="stat-icon" style="background: rgba(103, 194, 58, 0.1);">
-            <span style="font-size: 28px;">👨</span>
+      <div class="stat-card">
+        <div class="stat-header">
+          <div class="stat-icon blue">
+            <span style="font-size: 20px;">👨</span>
           </div>
-          <div class="stat-info">
-            <div class="stat-value">{{ stats.male }}</div>
-            <div class="stat-label">男性人员</div>
-          </div>
+          <Top class="trend-icon" />
         </div>
-      </el-col>
+        <h3 class="stat-title">男性人员</h3>
+        <p class="stat-value">{{ stats.male }}</p>
+        <p class="stat-trend positive">占比 {{ malePercent }}%</p>
+      </div>
 
-      <el-col :span="6" :xs="12" :sm="12" :md="6">
-        <div class="stat-card">
-          <div class="stat-icon" style="background: rgba(230, 162, 60, 0.1);">
-            <span style="font-size: 28px;">👩</span>
+      <div class="stat-card">
+        <div class="stat-header">
+          <div class="stat-icon pink">
+            <span style="font-size: 20px;">👩</span>
           </div>
-          <div class="stat-info">
-            <div class="stat-value">{{ stats.female }}</div>
-            <div class="stat-label">女性人员</div>
-          </div>
+          <Top class="trend-icon" />
         </div>
-      </el-col>
+        <h3 class="stat-title">女性人员</h3>
+        <p class="stat-value">{{ stats.female }}</p>
+        <p class="stat-trend positive">占比 {{ femalePercent }}%</p>
+      </div>
 
-      <el-col :span="6" :xs="12" :sm="12" :md="6">
-        <div class="stat-card">
-          <div class="stat-icon" style="background: rgba(64, 158, 255, 0.1);">
-            <el-icon :size="28" color="#409eff">
+      <div class="stat-card">
+        <div class="stat-header">
+          <div class="stat-icon purple">
+            <el-icon :size="20">
               <Calendar />
             </el-icon>
           </div>
-          <div class="stat-info">
-            <div class="stat-value">{{ stats.this_month }}</div>
-            <div class="stat-label">本月新增</div>
-          </div>
+          <Top class="trend-icon" />
         </div>
-      </el-col>
-    </el-row>
+        <h3 class="stat-title">本月新增</h3>
+        <p class="stat-value">{{ stats.this_month }}</p>
+        <p class="stat-trend positive">本月登记人员</p>
+      </div>
+    </div>
 
-    <!-- 第二行：两个性别水型图 -->
-    <el-row :gutter="20" style="margin-top: 20px;">
-      <!-- 男性水型图 -->
-      <el-col :span="12" :xs="24">
-        <el-card class="chart-card">
-          <template #header>
-            <div class="card-header">
-              <el-icon>
-                <IconPieChart />
-              </el-icon>
-              <span>男性分布</span>
-            </div>
-          </template>
-          <div class="chart-container" ref="maleChartRef"></div>
-        </el-card>
-      </el-col>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div class="chart-card">
+        <div class="card-header">
+          <div class="header-icon blue">
+            <el-icon :size="18">
+              <DataLine />
+            </el-icon>
+          </div>
+          <h3 class="header-title">男性分布</h3>
+        </div>
+        <div class="chart-container" ref="maleChartRef"></div>
+      </div>
 
-      <!-- 女性水型图 -->
-      <el-col :span="12" :xs="24">
-        <el-card class="chart-card">
-          <template #header>
-            <div class="card-header">
-              <el-icon>
-                <IconPieChart />
-              </el-icon>
-              <span>女性分布</span>
-            </div>
-          </template>
-          <div class="chart-container" ref="femaleChartRef"></div>
-        </el-card>
-      </el-col>
-    </el-row>
-
-    <!-- 第三行：婚姻状况饼图 -->
-    <el-row :gutter="20" style="margin-top: 20px;">
-      <el-col :span="24" :xs="24">
-        <el-card class="chart-card">
-          <template #header>
-            <div class="card-header">
-              <el-icon>
-                <DataLine />
-              </el-icon>
-              <span>婚姻状况分布</span>
-            </div>
-          </template>
-          <div class="chart-container" ref="maritalChartRef"></div>
-        </el-card>
-      </el-col>
-    </el-row>
+      <div class="chart-card">
+        <div class="card-header">
+          <div class="header-icon green">
+            <el-icon :size="18">
+              <DataLine />
+            </el-icon>
+          </div>
+          <h3 class="header-title">女性分布</h3>
+        </div>
+        <div class="chart-container" ref="femaleChartRef"></div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-  import { ref, onMounted, nextTick } from 'vue'
+  import { ref, onMounted, nextTick, computed } from 'vue'
   import { useRouter } from 'vue-router'
   import * as echarts from 'echarts/core'
   import { PieChart, BarChart } from 'echarts/charts'
   import { TitleComponent, TooltipComponent, LegendComponent } from 'echarts/components'
   import { CanvasRenderer } from 'echarts/renderers'
   import 'echarts-liquidfill'
-  import { UserFilled, User, Calendar, PieChart as IconPieChart, DataLine, Histogram, House, Odometer } from '@element-plus/icons-vue'
+  import { User, Calendar, DataLine, Top } from '@element-plus/icons-vue'
   import { API_BASE_URL } from '../config/api'
 
   const router = useRouter()
 
-  // 注册 ECharts
   echarts.use([TitleComponent, TooltipComponent, LegendComponent, PieChart, BarChart, CanvasRenderer])
 
-  const stats = ref({ total: 0, male: 0, female: 0, unmarried: 0, divorced: 0, widowed: 0, this_month: 0 })
+  const stats = ref({
+    total: 0,
+    male: 0,
+    female: 0,
+    unmarried: 0,
+    divorced: 0,
+    widowed: 0,
+    this_month: 0
+  })
+
+  const malePercent = computed(() => {
+    if (stats.value.total === 0) return 0
+    return ((stats.value.male / stats.value.total) * 100).toFixed(1)
+  })
+
+  const femalePercent = computed(() => {
+    if (stats.value.total === 0) return 0
+    return ((stats.value.female / stats.value.total) * 100).toFixed(1)
+  })
 
   const maleChartRef = ref(null)
   const femaleChartRef = ref(null)
-  const maritalChartRef = ref(null)
 
-  let maleChart = null, femaleChart = null, maritalChart = null
+  let maleChart = null, femaleChart = null
 
-  // 男性水型图
   const initMaleChart = () => {
     if (!maleChartRef.value) return
     maleChart = echarts.init(maleChartRef.value)
     const total = stats.value.total || 1
-    const malePercent = (stats.value.male / total * 100).toFixed(1)
+    const malePercentVal = (stats.value.male / total * 100).toFixed(1)
 
     maleChart.setOption({
       series: [{
@@ -144,25 +134,23 @@
         data: [{ value: stats.value.male / total, name: '男性' }],
         radius: '80%',
         center: ['50%', '50%'],
-        color: ['#5470c6'],
-        backgroundStyle: { color: '#fff', borderColor: '#ccc', borderWidth: 1, shadowColor: 'rgba(0, 0, 0, 0.1)', shadowBlur: 10 },
-        label: { fontSize: 28, color: '#666', formatter: () => `${malePercent}%` },
+        color: ['#3b82f6'],
+        backgroundStyle: { color: '#fff', borderColor: '#e4e7ed', borderWidth: 1, shadowColor: 'rgba(0, 0, 0, 0.05)', shadowBlur: 10 },
+        label: { fontSize: 28, color: '#666', formatter: () => `${malePercentVal}%` },
         outline: { show: false }
       }]
     })
 
-    // 添加点击事件
     maleChart.on('click', () => {
       router.push({ path: '/members', query: { gender: '男' } })
     })
   }
 
-  // 女性水型图
   const initFemaleChart = () => {
     if (!femaleChartRef.value) return
     femaleChart = echarts.init(femaleChartRef.value)
     const total = stats.value.total || 1
-    const femalePercent = (stats.value.female / total * 100).toFixed(1)
+    const femalePercentVal = (stats.value.female / total * 100).toFixed(1)
 
     femaleChart.setOption({
       series: [{
@@ -170,47 +158,15 @@
         data: [{ value: stats.value.female / total, name: '女性' }],
         radius: '80%',
         center: ['50%', '50%'],
-        color: ['#91cc75'],
-        backgroundStyle: { color: '#fff', borderColor: '#ccc', borderWidth: 1, shadowColor: 'rgba(0, 0, 0, 0.1)', shadowBlur: 10 },
-        label: { fontSize: 28, color: '#666', formatter: () => `${femalePercent}%` },
+        color: ['#ec4899'],
+        backgroundStyle: { color: '#fff', borderColor: '#e4e7ed', borderWidth: 1, shadowColor: 'rgba(0, 0, 0, 0.05)', shadowBlur: 10 },
+        label: { fontSize: 28, color: '#666', formatter: () => `${femalePercentVal}%` },
         outline: { show: false }
       }]
     })
 
-    // 添加点击事件
     femaleChart.on('click', () => {
       router.push({ path: '/members', query: { gender: '女' } })
-    })
-  }
-
-  // 婚姻状况饼图
-  const initMaritalChart = () => {
-    if (!maritalChartRef.value) return
-    maritalChart = echarts.init(maritalChartRef.value)
-
-    const data = [
-      { value: stats.value.unmarried, name: '未婚', itemStyle: { color: '#67c23a' } },
-      { value: stats.value.divorced, name: '离异', itemStyle: { color: '#e6a23c' } },
-      { value: stats.value.widowed, name: '丧偶', itemStyle: { color: '#909399' } }
-    ].filter(item => item.value > 0)
-
-    if (data.length === 0) data.push({ value: 1, name: '暂无数据', itemStyle: { color: '#f0f2f5' } })
-
-    maritalChart.setOption({
-      tooltip: { trigger: 'item', formatter: '{b}: {c} 人 ({d}%)' },
-      legend: { orient: 'vertical', right: 10, top: 'center', textStyle: { color: '#666' } },
-      series: [{
-        type: 'pie', radius: ['40%', '70%'], center: ['40%', '50%'],
-        avoidLabelOverlap: false, itemStyle: { borderRadius: 8, borderColor: '#fff', borderWidth: 2 },
-        label: { show: false }, emphasis: { label: { show: true, fontSize: 16, fontWeight: 'bold' } }, labelLine: { show: false }, data
-      }]
-    })
-
-    // 添加点击事件
-    maritalChart.on('click', (params) => {
-      if (params.name !== '暂无数据') {
-        router.push({ path: '/members', query: { marital_status: params.name } })
-      }
     })
   }
 
@@ -218,14 +174,12 @@
     nextTick(() => {
       initMaleChart()
       initFemaleChart()
-      initMaritalChart()
     })
   }
 
   const handleResize = () => {
     maleChart?.resize()
     femaleChart?.resize()
-    maritalChart?.resize()
   }
 
   const fetchStats = async () => {
@@ -249,82 +203,148 @@
 
 <style scoped>
   .stats-page {
-    max-width: 1600px;
+    max-width: 1400px;
     margin: 0 auto;
   }
 
-  .chart-card {
-    border-radius: 12px;
-    height: 340px;
-  }
-
-  .card-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 16px;
-    font-weight: 600;
-  }
-
-  .chart-container {
-    width: 100%;
-    height: 260px;
+  .stats-cards {
+    margin-bottom: 20px;
   }
 
   .stat-card {
+    padding: 24px;
+    border-radius: 16px;
+    border: 1px solid #e4e7ed;
     background: white;
-    border-radius: 12px;
-    padding: 20px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-    transition: transform 0.2s;
-    margin-bottom: 16px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    transition: box-shadow 0.2s, transform 0.2s;
   }
 
   .stat-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .stat-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
   }
 
   .stat-icon {
-    width: 56px;
-    height: 56px;
-    border-radius: 12px;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
   }
 
-  .stat-info {
-    flex: 1;
+  .stat-icon.purple {
+    background: rgba(139, 92, 246, 0.1);
+    color: #8b5cf6;
+  }
+
+  .stat-icon.blue {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+  }
+
+  .stat-icon.pink {
+    background: rgba(236, 72, 153, 0.1);
+    color: #ec4899;
+  }
+
+  .trend-icon {
+    width: 16px;
+    height: 16px;
+    color: #22c55e;
+  }
+
+  .stat-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: #6b7280;
+    margin-bottom: 4px;
   }
 
   .stat-value {
     font-size: 28px;
     font-weight: 700;
-    color: #303133;
+    color: #111827;
+    line-height: 1.2;
   }
 
-  .stat-label {
-    font-size: 14px;
-    color: #909399;
-    margin-top: 4px;
+  .stat-trend {
+    font-size: 13px;
+    margin-top: 8px;
+  }
+
+  .stat-trend.positive {
+    color: #22c55e;
+  }
+
+  .chart-card {
+    border-radius: 16px;
+    border: 1px solid #e4e7ed;
+    background: white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    padding: 24px;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .header-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .header-icon.blue {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+  }
+
+  .header-icon.green {
+    background: rgba(34, 197, 94, 0.1);
+    color: #22c55e;
+  }
+
+  .header-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #111827;
+  }
+
+  .chart-container {
+    width: 100%;
+    height: 280px;
   }
 
   @media (max-width: 768px) {
     .stats-page {
-      padding: 12px;
+      padding: 0;
+    }
+
+    .stat-card {
+      margin-bottom: 12px;
     }
 
     .chart-card {
       margin-bottom: 16px;
-      height: auto;
     }
 
     .chart-container {
-      height: 200px;
+      height: 220px;
     }
   }
 </style>

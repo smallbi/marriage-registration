@@ -7,6 +7,8 @@ import router from './router'
 
 // 导入字体配置
 import './assets/fonts/font.scss'
+// 导入 Tailwind CSS
+import './assets/tailwind.css'
 
 const app = createApp(App)
 

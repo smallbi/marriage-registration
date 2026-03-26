@@ -52,7 +52,7 @@
     </el-table>
 
     <!-- 新增/编辑角色对话框 -->
-    <el-dialog :title="dialogTitle" v-model="dialogVisible" width="500px" destroy-on-close>
+    <el-dialog :title="dialogTitle" v-model="dialogVisible" width="500px" destroy-on-close :close-on-click-modal="false">
       <el-form :model="formData" :rules="formRules" ref="formRef" label-width="100px">
         <el-form-item label="角色名称" prop="name">
           <el-input v-model="formData.name" placeholder="请输入角色名称" />
@@ -68,7 +68,7 @@
     </el-dialog>
 
     <!-- 分配菜单对话框 -->
-    <el-dialog title="分配菜单" v-model="menuDialogVisible" width="500px" destroy-on-close>
+    <el-dialog title="分配菜单" v-model="menuDialogVisible" width="500px" destroy-on-close :close-on-click-modal="false">
       <el-tree
         ref="menuTreeRef"
         :data="allMenus"

@@ -57,7 +57,7 @@
     </el-table>
 
     <!-- 分配角色对话框 -->
-    <el-dialog title="分配角色" v-model="roleDialogVisible" width="400px" destroy-on-close>
+    <el-dialog title="分配角色" v-model="roleDialogVisible" width="400px" destroy-on-close :close-on-click-modal="false">
       <el-form :model="roleForm" label-width="80px">
         <el-form-item label="用户">
           <el-input v-model="roleForm.username" disabled />
@@ -75,7 +75,7 @@
     </el-dialog>
 
     <!-- 新增/编辑用户对话框 -->
-    <el-dialog :title="dialogTitle" v-model="dialogVisible" width="500px" destroy-on-close>
+    <el-dialog :title="dialogTitle" v-model="dialogVisible" width="500px" destroy-on-close :close-on-click-modal="false">
       <UserForm :initial-data="currentEditUser" @submit="handleFormSubmit" @cancel="dialogVisible = false" />
     </el-dialog>
   </el-card>

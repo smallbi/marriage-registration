@@ -3,13 +3,10 @@
     <!-- 移动端：侧边栏改为抽屉 -->
     <el-drawer v-model="drawerVisible" direction="ltr" size="210px" :show-close="false" class="mobile-drawer">
       <div class="drawer-logo">
-        <el-icon :size="24" color="#409eff">
-          <Connection />
-        </el-icon>
         <span class="logo-text">丽姐·锦绣谱</span>
       </div>
-      <el-menu :default-active="activeMenu" class="layout-menu" background-color="#1d2939" text-color="#8b949e"
-        active-text-color="#fff" :router="true" @select="handleMenuSelect">
+      <el-menu :default-active="activeMenu" class="layout-menu" background-color="#ffffff" text-color="#606266"
+        active-text-color="#8b5cf6" :router="true" @select="handleMenuSelect">
         <template v-for="menu in dynamicMenus" :key="menu.id">
           <el-menu-item :index="menu.path">
             <el-icon>
@@ -26,16 +23,13 @@
       <div class="aside-box" :style="{ width: isCollapse ? '65px' : '210px' }">
         <!-- Logo 部分 -->
         <div class="logo flx-center">
-          <el-icon :size="24" color="#409eff">
-            <Connection />
-          </el-icon>
           <span v-show="!isCollapse" class="logo-text">丽姐·锦绣谱</span>
         </div>
 
         <!-- 导航菜单 -->
         <el-scrollbar>
-          <el-menu :default-active="activeMenu" class="layout-menu" background-color="#1d2939" text-color="#8b949e"
-            active-text-color="#fff" :router="true" :collapse="isCollapse" :collapse-transition="false">
+          <el-menu :default-active="activeMenu" class="layout-menu" background-color="#ffffff" text-color="#606266"
+            active-text-color="#8b5cf6" :router="true" :collapse="isCollapse" :collapse-transition="false">
             <!-- 动态菜单 -->
             <template v-for="menu in dynamicMenus" :key="menu.id">
               <el-menu-item :index="menu.path">
@@ -124,7 +118,7 @@
     // 先从动态菜单中查找
     const menu = dynamicMenus.value.find(m => m.path === route.path)
     if (menu) return menu.name
-    
+
     // 备用静态映射
     const titles = {
       '/stats': '数据统计',
@@ -152,7 +146,7 @@
     if (savedUsername) {
       username.value = savedUsername
     }
-    
+
     // 从localStorage加载动态菜单
     const savedMenus = localStorage.getItem('menus')
     if (savedMenus) {
@@ -203,8 +197,8 @@
 
   /* 左侧 aside */
   .layout-aside {
-    background: #1d2939;
-    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    background: #ffffff;
+    border-right: 1px solid #e4e7ed;
     transition: width 0.3s ease;
   }
 
@@ -222,7 +216,7 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    color: white;
+    color: #303133;
     padding: 0 20px;
   }
 
@@ -251,35 +245,30 @@
   .layout-menu .el-menu-item {
     height: 48px;
     line-height: 48px;
-    margin: 0;
-    border-radius: 0;
+    margin: 4px 8px;
+    border-radius: 8px;
     transition: all 0.3s ease;
   }
 
   .layout-menu .el-menu-item:hover {
-    color: rgba(255, 255, 255, 0.8);
-    background: rgba(64, 158, 255, 0.1) !important;
+    color: #8b5cf6;
+    background: rgba(139, 92, 246, 0.1) !important;
   }
 
   .layout-menu .el-menu-item.is-active {
-    color: #ffffff !important;
-    background: rgba(64, 158, 255, 0.2) !important;
+    color: #8b5cf6 !important;
+    background: rgba(139, 92, 246, 0.15) !important;
     position: relative;
   }
 
   .layout-menu .el-menu-item.is-active::before {
-    position: absolute;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    width: 4px;
-    content: "";
-    background-color: var(--el-color-primary, #409eff);
+    display: none;
   }
 
   /* 收起时的菜单样式 */
   .el-aside .el-menu--collapse .el-menu-item {
     padding: 0 calc(50% - 14px);
+    border-radius: 8px;
   }
 
   .el-aside .el-menu--collapse .el-menu-item span {
@@ -287,7 +276,7 @@
   }
 
   .el-aside .el-menu--collapse .el-menu-item.is-active {
-    background: rgba(64, 158, 255, 0.3) !important;
+    background: rgba(139, 92, 246, 0.15) !important;
   }
 
   /* 右侧 section */
@@ -326,7 +315,7 @@
 
   .collapse-icon:hover {
     background: #f5f7fa;
-    color: #409eff;
+    color: #8b5cf6;
   }
 
   .breadcrumb {
@@ -401,6 +390,7 @@
   .mobile-only {
     display: none;
   }
+
   .desktop-only {
     display: block;
   }
@@ -408,21 +398,25 @@
   /* 移动端抽屉 */
   .mobile-drawer .el-drawer__body {
     padding: 0;
-    background: #1d2939;
+    background: #ffffff;
   }
+
   .drawer-logo {
     display: flex;
     align-items: center;
     gap: 10px;
     height: 55px;
     padding: 0 20px;
-    color: white;
-    background: #1d2939;
+    color: #303133;
+    background: #ffffff;
+    border-bottom: 1px solid #e4e7ed;
   }
+
   .drawer-logo .logo-text {
     font-size: 18px;
     font-weight: bold;
   }
+
   .mobile-drawer .layout-menu {
     border-right: none;
   }
@@ -432,9 +426,11 @@
     .mobile-only {
       display: block;
     }
+
     .desktop-only {
       display: none;
     }
+
     .main-content {
       padding: 12px;
     }
